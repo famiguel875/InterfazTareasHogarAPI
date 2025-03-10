@@ -46,7 +46,9 @@ fun UserListScreen(viewModel: UsuariosViewModel, navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Lista de Usuarios", style = MaterialTheme.typography.headlineMedium) },
+                title = {
+                    Text("Lista de Usuarios", style = MaterialTheme.typography.headlineMedium)
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigate("menu") }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver al Menú")
@@ -94,13 +96,7 @@ fun UserItem(usuario: Usuario, viewModel: UsuariosViewModel) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = "Username: ${usuario.username}", style = MaterialTheme.typography.titleMedium)
             Text(text = "Email: ${usuario.email}", style = MaterialTheme.typography.bodyMedium)
-            Text(text = "Roles: ${usuario.roles.joinToString(", ")}", style = MaterialTheme.typography.bodyMedium)
-            usuario.direccion?.let { direccion ->
-                Text(
-                    text = "Dirección: ${direccion.calle} ${direccion.numero}, ${direccion.ciudad} (${direccion.codigoPostal})",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
+            Text(text = "Roles: ${usuario.roles}", style = MaterialTheme.typography.bodyMedium)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
@@ -112,6 +108,8 @@ fun UserItem(usuario: Usuario, viewModel: UsuariosViewModel) {
         }
     }
 }
+
+
 
 
 
