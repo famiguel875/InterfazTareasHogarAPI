@@ -53,13 +53,25 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * Pantalla principal que muestra la lista de direcciones.
+ *
+ * Esta función Composable utiliza el [DireccionesViewModel] para obtener la lista
+ * de direcciones y actualizarlas a través de llamadas a la API. Además, permite la
+ * navegación de vuelta al menú y la apertura de un diálogo para agregar nuevas direcciones.
+ *
+ * @param viewModel Instancia del ViewModel encargado de gestionar las direcciones.
+ * @param navController Controlador de navegación para gestionar la navegación entre pantallas.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DireccionListScreen(viewModel: DireccionesViewModel, navController: NavController) {
+    // Se obtiene la lista de direcciones desde el StateFlow del ViewModel.
     val direcciones by viewModel.direccionesList.collectAsState()
+    // Variable mutable para controlar si se muestra el diálogo para agregar dirección.
     var showDialog by remember { mutableStateOf(false) }
 
-    // Al iniciar la pantalla, se carga la lista de direcciones.
+    // Al iniciar la pantalla se carga la lista de direcciones llamando al ViewModel.
     LaunchedEffect(Unit) {
         viewModel.cargarDirecciones()
     }
@@ -67,12 +79,16 @@ fun DireccionListScreen(viewModel: DireccionesViewModel, navController: NavContr
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Lista de Direcciones", style = MaterialTheme.typography.headlineMedium) },
+                title = {
+                    Text("Lista de Direcciones", style = MaterialTheme.typography.headlineMedium)
+                },
+                // Botón de navegación para volver a la pantalla de menú.
                 navigationIcon = {
                     IconButton(onClick = { navController.navigate("menu") }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver al Menú")
                     }
                 },
+                // Botón para refrescar la lista de direcciones.
                 actions = {
                     IconButton(onClick = { viewModel.cargarDirecciones() }) {
                         Icon(Icons.Default.Refresh, contentDescription = "Actualizar", tint = Color.Black)
@@ -80,6 +96,7 @@ fun DireccionListScreen(viewModel: DireccionesViewModel, navController: NavContr
                 }
             )
         },
+        // Botón flotante para abrir el diálogo de agregar dirección.
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showDialog = true },
@@ -89,6 +106,7 @@ fun DireccionListScreen(viewModel: DireccionesViewModel, navController: NavContr
             }
         }
     ) { paddingValues ->
+        // Contenedor principal que muestra la lista o un mensaje si la lista está vacía.
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -98,6 +116,7 @@ fun DireccionListScreen(viewModel: DireccionesViewModel, navController: NavContr
             if (direcciones.isEmpty()) {
                 Text("No hay direcciones disponibles", style = MaterialTheme.typography.bodyLarge, color = Color.Gray)
             } else {
+                // Se utiliza LazyColumn para listar cada dirección.
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
@@ -111,12 +130,21 @@ fun DireccionListScreen(viewModel: DireccionesViewModel, navController: NavContr
         }
     }
 
+    // Muestra el diálogo para agregar dirección si showDialog es verdadero.
     if (showDialog) {
         AddDireccionDialog(onDismiss = { showDialog = false }, viewModel = viewModel)
     }
 }
 
-
+/**
+ * Composable que representa un ítem de la lista de direcciones.
+ *
+ * Muestra la información de una dirección (calle, número, ciudad, código postal y username).
+ * Además, incluye un botón para eliminar la dirección llamando al ViewModel.
+ *
+ * @param direccion Objeto [Direccion] que contiene los datos de la dirección.
+ * @param viewModel Instancia del [DireccionesViewModel] para ejecutar operaciones.
+ */
 @Composable
 fun DireccionItem(direccion: Direccion, viewModel: DireccionesViewModel) {
     Card(
@@ -126,9 +154,13 @@ fun DireccionItem(direccion: Direccion, viewModel: DireccionesViewModel) {
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
+            // Muestra la calle y el número.
             Text(text = "${direccion.calle} ${direccion.numero}", style = MaterialTheme.typography.titleMedium)
+            // Muestra la ciudad y el código postal.
             Text(text = "${direccion.ciudad} (${direccion.codigoPostal})", style = MaterialTheme.typography.bodyMedium)
+            // Muestra el username asociado a la dirección.
             Text(text = "Usuario: ${direccion.username}", style = MaterialTheme.typography.bodyMedium)
+            // Botón para eliminar la dirección.
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
@@ -141,6 +173,16 @@ fun DireccionItem(direccion: Direccion, viewModel: DireccionesViewModel) {
     }
 }
 
+/**
+ * Diálogo para agregar una nueva dirección.
+ *
+ * Muestra campos de entrada para que el usuario ingrese los datos necesarios para
+ * crear una nueva dirección (código, calle, número, ciudad, código postal y username).
+ * Al confirmar, se llama a la función [crearDireccion] del ViewModel.
+ *
+ * @param onDismiss Función a ejecutar cuando se cierra el diálogo.
+ * @param viewModel Instancia del [DireccionesViewModel] para gestionar la creación de la dirección.
+ */
 @Composable
 fun AddDireccionDialog(onDismiss: () -> Unit, viewModel: DireccionesViewModel) {
     var codigo by remember { mutableStateOf("") }
@@ -155,6 +197,7 @@ fun AddDireccionDialog(onDismiss: () -> Unit, viewModel: DireccionesViewModel) {
         title = { Text("Agregar Nueva Dirección") },
         text = {
             Column {
+                // Campo para el código de la dirección (formato DIRxxx).
                 OutlinedTextField(
                     value = codigo,
                     onValueChange = { codigo = it },
@@ -162,6 +205,7 @@ fun AddDireccionDialog(onDismiss: () -> Unit, viewModel: DireccionesViewModel) {
                     singleLine = true
                 )
                 Spacer(modifier = Modifier.height(8.dp))
+                // Campo para la calle.
                 OutlinedTextField(
                     value = calle,
                     onValueChange = { calle = it },
@@ -169,6 +213,7 @@ fun AddDireccionDialog(onDismiss: () -> Unit, viewModel: DireccionesViewModel) {
                     singleLine = true
                 )
                 Spacer(modifier = Modifier.height(8.dp))
+                // Campo para el número.
                 OutlinedTextField(
                     value = numero,
                     onValueChange = { numero = it },
@@ -176,6 +221,7 @@ fun AddDireccionDialog(onDismiss: () -> Unit, viewModel: DireccionesViewModel) {
                     singleLine = true
                 )
                 Spacer(modifier = Modifier.height(8.dp))
+                // Campo para la ciudad.
                 OutlinedTextField(
                     value = ciudad,
                     onValueChange = { ciudad = it },
@@ -183,6 +229,7 @@ fun AddDireccionDialog(onDismiss: () -> Unit, viewModel: DireccionesViewModel) {
                     singleLine = true
                 )
                 Spacer(modifier = Modifier.height(8.dp))
+                // Campo para el código postal.
                 OutlinedTextField(
                     value = codigoPostal,
                     onValueChange = { codigoPostal = it },
@@ -190,6 +237,7 @@ fun AddDireccionDialog(onDismiss: () -> Unit, viewModel: DireccionesViewModel) {
                     singleLine = true
                 )
                 Spacer(modifier = Modifier.height(8.dp))
+                // Campo para el username asociado a la dirección.
                 OutlinedTextField(
                     value = username,
                     onValueChange = { username = it },
@@ -200,6 +248,7 @@ fun AddDireccionDialog(onDismiss: () -> Unit, viewModel: DireccionesViewModel) {
         },
         confirmButton = {
             Button(onClick = {
+                // Se llama a la función del ViewModel para crear la dirección.
                 viewModel.crearDireccion(codigo, calle, numero, ciudad, codigoPostal, username)
                 onDismiss()
             }) {
@@ -211,6 +260,7 @@ fun AddDireccionDialog(onDismiss: () -> Unit, viewModel: DireccionesViewModel) {
         }
     )
 }
+
 
 
 

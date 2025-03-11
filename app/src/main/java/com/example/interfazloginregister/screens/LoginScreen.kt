@@ -35,18 +35,35 @@ import androidx.navigation.NavHostController
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.interfazloginregister.viewmodel.AuthViewModelLogin
 
+/**
+ * Pantalla de Login de la aplicación.
+ *
+ * Esta función Composable muestra el formulario de autenticación, permitiendo que el usuario
+ * ingrese su nombre de usuario y contraseña. Se ofrece la posibilidad de alternar la visibilidad
+ * de la contraseña. Durante el proceso de autenticación se muestra un indicador de carga y,
+ * en caso de error, se muestra un mensaje. Cuando se obtiene un token válido (JWT), la pantalla
+ * navega a la pantalla "menu", eliminando la pantalla de login de la pila de navegación.
+ *
+ * @param navController Controlador de navegación utilizado para redirigir a otras pantallas.
+ * @param viewModel Instancia de AuthViewModelLogin que gestiona la lógica de autenticación.
+ */
 @Composable
 fun LoginScreen(
     navController: NavHostController,
     viewModel: AuthViewModelLogin = viewModel()
 ) {
+    // Variables de estado para guardar las credenciales y el estado de la contraseña.
     var username by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
+
+    // Se recogen los valores del token, indicador de carga y mensajes de error del ViewModel.
     val token by viewModel.token.collectAsState()
     val loading by viewModel.loading.collectAsState()
     val error by viewModel.error.collectAsState()
 
+    // Cuando se actualiza el token (por ejemplo, después de un login exitoso),
+    // se navega a la pantalla "menu", eliminando la pantalla de login.
     LaunchedEffect(token) {
         if (token != null) {
             navController.navigate("menu") {
@@ -55,16 +72,21 @@ fun LoginScreen(
         }
     }
 
+    // Contenedor principal que centra el contenido en la pantalla.
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
+        // Contenedor vertical que agrupa los elementos del formulario de login.
         Column(
             modifier = Modifier.padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Título de la pantalla.
             Text("Iniciar Sesión", style = MaterialTheme.typography.headlineMedium)
             Spacer(modifier = Modifier.height(24.dp))
+
+            // Campo de entrada para el nombre de usuario.
             OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
@@ -73,6 +95,9 @@ fun LoginScreen(
                 singleLine = true
             )
             Spacer(modifier = Modifier.height(12.dp))
+
+            // Campo de entrada para la contraseña.
+            // Permite alternar la visibilidad mediante el ícono de trailing.
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
@@ -81,15 +106,25 @@ fun LoginScreen(
                 trailingIcon = {
                     val icon = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(imageVector = icon, contentDescription = if (passwordVisible) "Ocultar" else "Mostrar")
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = if (passwordVisible) "Ocultar" else "Mostrar"
+                        )
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
             Spacer(modifier = Modifier.height(16.dp))
+
+            // Muestra un indicador de carga si el proceso de autenticación está en curso.
             if (loading) CircularProgressIndicator()
+
+            // Muestra un mensaje de error si ocurre alguno durante el login.
             error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+
+            // Botón para iniciar el proceso de login.
+            // Llama a la función login del ViewModel con las credenciales ingresadas.
             Button(
                 onClick = { viewModel.login(username, password) },
                 modifier = Modifier.fillMaxWidth()
@@ -97,6 +132,8 @@ fun LoginScreen(
                 Text("Ingresar")
             }
             Spacer(modifier = Modifier.height(16.dp))
+
+            // Texto clicable para navegar a la pantalla de registro.
             ClickableText(
                 text = AnnotatedString("¿No tienes cuenta? Regístrate"),
                 onClick = { navController.navigate("register") },
@@ -105,4 +142,5 @@ fun LoginScreen(
         }
     }
 }
+
 
