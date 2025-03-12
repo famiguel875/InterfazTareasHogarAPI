@@ -41,17 +41,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.interfazloginregister.model.Direccion
-import com.example.interfazloginregister.model.DireccionDTO
-import com.example.interfazloginregister.network.ApiService
-import com.example.interfazloginregister.repository.UserPreferences
 import com.example.interfazloginregister.viewmodel.DireccionesViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 
 /**
  * Pantalla principal que muestra la lista de direcciones.
