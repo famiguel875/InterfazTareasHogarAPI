@@ -36,95 +36,40 @@ fun RegisterScreen(
     navController: NavController,
     onRegisterSuccess: () -> Unit
 ) {
-    // Variables de estado para los campos de entrada.
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordRepeat by remember { mutableStateOf("") }
     var rol by remember { mutableStateOf("") }
 
-    // Recoge los estados de carga y error del ViewModel para mostrarlos en la UI.
     val loading by viewModel.loading.collectAsState()
     val registerError by viewModel.error.collectAsState()
-
-    // Se utiliza un scroll state para permitir el desplazamiento en pantallas con muchos campos.
     val scrollState = rememberScrollState()
 
-    // Box es el contenedor principal, que centra su contenido y aplica un padding general.
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+        modifier = Modifier.fillMaxSize().padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Column organiza verticalmente los elementos del formulario.
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState),
+            modifier = Modifier.fillMaxSize().verticalScroll(scrollState),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Título de la pantalla.
             Text("Registro", style = MaterialTheme.typography.headlineMedium)
             Spacer(modifier = Modifier.height(24.dp))
-
-            // Campo para ingresar el nombre de usuario.
-            OutlinedTextField(
-                value = username,
-                onValueChange = { username = it },
-                label = { Text("Usuario") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-            // Campo para ingresar el email.
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Email") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-            // Campo para ingresar la contraseña.
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text("Contraseña") },
-                visualTransformation = PasswordVisualTransformation(),
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-            // Campo para repetir la contraseña.
-            OutlinedTextField(
-                value = passwordRepeat,
-                onValueChange = { passwordRepeat = it },
-                label = { Text("Repetir Contraseña") },
-                visualTransformation = PasswordVisualTransformation(),
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-            // Campo para ingresar el rol. Si se deja vacío, se asignará "USER".
-            OutlinedTextField(
-                value = rol,
-                onValueChange = { rol = it },
-                label = { Text("Rol") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
+            OutlinedTextField(value = username, onValueChange = { username = it }, label = { Text("Usuario") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text("Email") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            OutlinedTextField(value = password, onValueChange = { password = it }, label = { Text("Contraseña") }, visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth(), singleLine = true)
+            OutlinedTextField(value = passwordRepeat, onValueChange = { passwordRepeat = it }, label = { Text("Repetir Contraseña") }, visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth(), singleLine = true)
+            OutlinedTextField(value = rol, onValueChange = { rol = it }, label = { Text("Rol") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
             Spacer(modifier = Modifier.height(16.dp))
-
-            // Muestra un indicador de carga si se está procesando el registro.
             if (loading) CircularProgressIndicator()
-            // Muestra el error de registro si existe.
             registerError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-
-            // Botón para registrar al usuario.
-            // Llama a la función register del ViewModel con los datos ingresados.
             Button(
                 onClick = {
                     viewModel.register(
                         UsuarioRegisterDTO(
                             username, email, password, passwordRepeat,
-                            rol.ifBlank { "USER" }  // Si el campo rol está en blanco, se asigna "USER".
+                            rol.ifBlank { "USER" }  // Se envía el rol en mayúsculas o se asigna "USER"
                         )
                     )
                 },
@@ -133,8 +78,6 @@ fun RegisterScreen(
                 Text("Registrarse")
             }
             Spacer(modifier = Modifier.height(16.dp))
-
-            // Texto clicable que permite navegar a la pantalla de login si el usuario ya tiene cuenta.
             ClickableText(
                 text = AnnotatedString("¿Ya tienes cuenta? Inicia sesión"),
                 onClick = { navController.navigate("login") },
